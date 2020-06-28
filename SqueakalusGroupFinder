@@ -1,0 +1,44 @@
+import requests
+from bs4 import BeautifulSoup
+import random 
+
+
+def main():
+    counter = 0
+    Empty = 0
+    Locked = 0
+    found = 0
+    while True:
+        print("Groups Scanned: " + str(counter))
+        print("Empty Groups Found But Closed: " + str(Empty))
+        print("Locked Groups Found: " + str(Locked))
+        print("Empty Claimable Groups Found: " + str(found))
+        num = random.randint(50000, 1200000)
+        num = str(num)
+        URL = ('https://www.roblox.com/groups/' + num)
+        headers = {
+            "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'}
+        proxies = {'http://inschought.com': '163.172.211.204:5836'}
+        page = requests.get(URL, headers=headers, proxies=proxies)
+        soup = BeautifulSoup(page.text, 'html.parser')
+        title = soup.find("meta",  property="og:description")
+        title = str(title)
+        counter = counter + 1
+        if "owned" not in (title):
+            r = requests.get('https://groups.roblox.com/v1/groups/' + num)
+            if '"publicEntryAllowed":false' in r.text:
+                Empty = Empty + 1
+            if '"isLocked":true' in r.text:
+                Locked = Locked + 1
+            if '"publicEntryAllowed":true' in r.text:
+                if '"isLocked":true' not in r.text:
+                    f=open("FoundEmptyGroups.txt", "a+")
+                    f.write("\n")
+                    f.write(URL)
+                    print("Found Empty Claimable Group: " + (URL))
+                    found = found + 1
+main()
+
+       
+       
+
